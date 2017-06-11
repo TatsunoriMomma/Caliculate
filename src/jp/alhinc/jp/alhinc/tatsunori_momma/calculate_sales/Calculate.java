@@ -1,13 +1,10 @@
 package jp.alhinc.jp.alhinc.tatsunori_momma.calculate_sales;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -49,7 +46,7 @@ public class Calculate {
             String[] temp;
 
             while((a = br.readLine()) != null) {
-        	    	temp = a.split(",");
+        	    	temp = a.split(",",-1);
         	        //支店定義フォーマットの判別式
         	    	if(temp.length == 2 && temp[0].length() == 3) {
         	            try{
@@ -106,6 +103,7 @@ public class Calculate {
 
     	//売り上げファイルの読み込み
 		ArrayList <String>rcdList = new ArrayList<String>();
+		ArrayList <Integer>rcdListInt = new ArrayList<Integer>();
 		ArrayList<Map.Entry<String,Integer>> BranchSaleList = new ArrayList<Map.Entry<String,Integer>>(BranchSaleSum.entrySet());
 
 		try {
@@ -129,12 +127,20 @@ public class Calculate {
 			}
 			System.out.println(rcdList);
 
+            //rcdListIntへキャストしてコピー
+			for(String r : rcdList) {
+			    rcdListInt.add(Integer.parseInt(r.substring(0,8)));
+			}
 			//rcdListの連番チェック
-
+			for(int i = 0 ; i < rcdListInt.size(); i++){
+				if (rcdListInt.get(i) != i + 1 ) {
+					System.out.println("ファイル名が連番になっていません");
+				}
+			}
 
 			//rcdファイルをひとつずつ処理する
             int i ; // i + 1番目のrcdファイルを処理中
-			String[] saleTemp;
+			String[]  saleTemp;
 			saleTemp = new String[3]; //[0]=支店コード[1]=商品コード[2]=金額
             for(i = 0; i < rcdList.size(); i++) {
             	File file = new File(directory ,rcdList.get(i));
@@ -144,17 +150,23 @@ public class Calculate {
     			//ファイルの読み込み、ここでファイルの中身が四桁以上あるときのエラーをやる
     			//try-catchがネストしているのも問題
     			String a;
-    			int count = 0;
+    			int count = 0; //何個目のrcdファイルかはcount + 1で出る
     			while((a = br.readLine()) != null){
     				try{
-    					saleTemp[count] = a;
+    				    saleTemp[count] = a;
     				    count += 1;
     				}
     				catch(ArrayIndexOutOfBoundsException e) {
     					System.out.println(e);
-    					System.out.println( "のフォーマットが不正です");
+    					System.out.println( count + 1 + "のフォーマットが不正です");
     				}
+    				for(String tem  : saleTemp){
+    					if(tem == null) {
+    						System.out.println( count + 1 + "のフォーマットが不正です");
+    				    }
+    			    }
     			}
+
 
     			//支店合計
     			BranchSaleSum.put(saleTemp[0] , BranchSaleSum.get(saleTemp[0]) + Integer.parseInt(saleTemp[2]));
@@ -163,6 +175,7 @@ public class Calculate {
                 	System.out.println("合計金額が十桁を超えました");
                 	break;
                 }
+                //tempを空にする
 
     			br.close();
             }
@@ -181,6 +194,9 @@ public class Calculate {
             	}
             });
 
+
+
+
             //支店コード、支店名、合計額の出力（確認用）
             System.out.println(BranchSaleList);
             for (Entry<String,Integer> entry : BranchSaleList) {
@@ -192,6 +208,8 @@ public class Calculate {
 			System.out.println(e);
 			System.out.println("売り上げファイルが存在しません");
 		}
+
+		/*
 		//branch.outの作成
 		File file = new File(directory,"branch.out");
 		    try{
@@ -209,12 +227,12 @@ public class Calculate {
 	            	pw.println(entry.getKey() + "," + BranchMap.get(entry.getKey()) + "," + entry.getValue());
 	            }
 
-	          //FileWriterオブジェクトをクローズ
+	          //PrintWriterオブジェクトをクローズ
 	          pw.close();
 		    }
 		    catch(IOException e){
 		      System.out.println(e);
 		    }
-
+        */
 	}
 }
