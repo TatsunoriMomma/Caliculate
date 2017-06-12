@@ -76,7 +76,7 @@ public class Calculate {
     	}
 
 
-    	HashMap<String,String> ProductMap = new HashMap<String ,String>();
+    	HashMap<String,String> productNameMap = new HashMap<String ,String>();
     	//商品定義ファイルの格納
     	try{
 		    File file = new File(directory ,"commodity.lst");
@@ -89,13 +89,13 @@ public class Calculate {
         	    	temp = a.split(",");
         	        //商品定義フォーマットの判別式
         	    	if(temp[0].matches("[A-Z]{3}[0-9]{5}")) {
-        	            ProductMap.put(temp[0],temp[1]);
+        	            productNameMap.put(temp[0],temp[1]);
         	    	}
         	    	else {
         	    		System.out.println("商品定義ファイルのフォーマットが不正です");
         	    	}
         	}
-            System.out.println(ProductMap);
+            System.out.println(productNameMap);
 		    br.close();
     	}
     	catch(IOException e) {
@@ -122,8 +122,6 @@ public class Calculate {
 			    Matcher m = p.matcher(fileList[i]);
 			    if (m.find()) {
 				    rcdList.add(fileList[i]);
-			    }
-			    else {
 			    }
 			}
 
@@ -168,7 +166,9 @@ public class Calculate {
 
 
     			//支店合計
-    			branchSaleMap.put(saleTemp[0] , branchSaleMap.get(saleTemp[0]) + Integer.parseInt(saleTemp[2]));
+    			if(branchNameMap.containsKey(saleTemp[0])){
+    			    branchSaleMap.put(saleTemp[0] , branchSaleMap.get(saleTemp[0]) + Integer.parseInt(saleTemp[2]));
+    			}
     			//10桁を超えたらループを抜けて読み込み中断
                 if (branchSaleMap.get(saleTemp[0]) > 1000000000) {
                 	System.out.println("合計金額が十桁を超えました");
