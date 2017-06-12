@@ -21,6 +21,9 @@ import java.util.regex.Pattern;
 
 
 public class Calculate {
+
+
+
     public static void main(String[] args) {
     	//ディレクトリを標準入力で受け取る
     	System.out.println("ディレクトリを入力してください。");
@@ -29,10 +32,10 @@ public class Calculate {
 
     	String directory = "";
 
-    	HashMap<String ,String> BranchMap = new HashMap<String ,String>(); //支店コード、支店名
+    	HashMap<String ,String> branchNameMap = new HashMap<String ,String>(); //支店コード、支店名
 
-    	HashMap<String, Integer> BranchSaleSum = new HashMap<String, Integer>(); //支店コード、売り上げ
-		HashMap<String, Integer> ProductSaleSum = new HashMap<String,Integer>();
+    	HashMap<String, Integer> branchSaleMap = new HashMap<String, Integer>(); //支店コード、売り上げ
+		HashMap<String, Integer> productSaleMap = new HashMap<String,Integer>();
 
     	//支店定義ファイルの格納
     	try{
@@ -51,8 +54,8 @@ public class Calculate {
         	    	if(temp.length == 2 && temp[0].length() == 3) {
         	            try{
 
-        	                BranchMap.put(temp[0],temp[1]);
-        	                BranchSaleSum.put(temp[0],0);
+        	                branchNameMap.put(temp[0],temp[1]);
+        	                branchSaleMap.put(temp[0],0);
         	            }
         	            catch(java.lang.NumberFormatException e) {
         	            	System.out.println("支店定義ファイルのフォーマットが不正です");
@@ -64,7 +67,7 @@ public class Calculate {
 
         	    	}
         	}
-            System.out.println(BranchMap);
+            System.out.println(branchNameMap);
 		    br.close();
     	}
     	catch(IOException e) {
@@ -103,8 +106,7 @@ public class Calculate {
 
     	//売り上げファイルの読み込み
 		ArrayList <String>rcdList = new ArrayList<String>();
-		ArrayList <Integer>rcdListInt = new ArrayList<Integer>();
-		ArrayList<Map.Entry<String,Integer>> BranchSaleList = new ArrayList<Map.Entry<String,Integer>>(BranchSaleSum.entrySet());
+		ArrayList<Map.Entry<String,Integer>> BranchSaleList = new ArrayList<Map.Entry<String,Integer>>(branchSaleMap.entrySet());
 
 		try {
 			File targetDir = null;
@@ -125,18 +127,9 @@ public class Calculate {
 			    else {
 			    }
 			}
-			System.out.println(rcdList);
 
-            //rcdListIntへキャストしてコピー
-			for(String r : rcdList) {
-			    rcdListInt.add(Integer.parseInt(r.substring(0,8)));
-			}
-			//rcdListの連番チェック
-			for(int i = 0 ; i < rcdListInt.size(); i++){
-				if (rcdListInt.get(i) != i + 1 ) {
-					System.out.println("ファイル名が連番になっていません");
-				}
-			}
+			SerialNumberCheck(rcdList);
+
 
 			//rcdファイルをひとつずつ処理する
             int i ; // i + 1番目のrcdファイルを処理中
@@ -150,38 +143,41 @@ public class Calculate {
     			//ファイルの読み込み、ここでファイルの中身が四桁以上あるときのエラーをやる
     			//try-catchがネストしているのも問題
     			String a;
-    			int count = 0; //何個目のrcdファイルかはcount + 1で出る
+    			int count = 0; //count + 1は何行目の処理なのかを示す
     			while((a = br.readLine()) != null){
+
     				try{
     				    saleTemp[count] = a;
     				    count += 1;
     				}
+    				//4行を超える場合
     				catch(ArrayIndexOutOfBoundsException e) {
     					System.out.println(e);
     					System.out.println( count + 1 + "のフォーマットが不正です");
     				}
-    				for(String tem  : saleTemp){
-    					if(tem == null) {
-    						System.out.println( count + 1 + "のフォーマットが不正です");
-    				    }
-    			    }
+    			}
+    			//3行ない場合
+    			for(String tem  : saleTemp){
+					if(tem == null) {
+						System.out.println("null"+ "のフォーマットが不正です");
+				    }
     			}
 
 
     			//支店合計
-    			BranchSaleSum.put(saleTemp[0] , BranchSaleSum.get(saleTemp[0]) + Integer.parseInt(saleTemp[2]));
+    			branchSaleMap.put(saleTemp[0] , branchSaleMap.get(saleTemp[0]) + Integer.parseInt(saleTemp[2]));
     			//10桁を超えたらループを抜けて読み込み中断
-                if (BranchSaleSum.get(saleTemp[0]) > 1000000000) {
+                if (branchSaleMap.get(saleTemp[0]) > 1000000000) {
                 	System.out.println("合計金額が十桁を超えました");
                 	break;
                 }
-                //tempを空にする
+                //saleTempを空にする
 
     			br.close();
             }
             //支店の出力（確認用）
-			for(String key : BranchSaleSum.keySet()) {
-				System.out.println(key + "," + BranchMap.get(key) +"," +BranchSaleSum.get(key) );
+			for(String key : branchSaleMap.keySet()) {
+				System.out.println(key + "," + branchNameMap.get(key) +"," +branchSaleMap.get(key) );
 
 			}
 			//ソート
@@ -200,7 +196,7 @@ public class Calculate {
             //支店コード、支店名、合計額の出力（確認用）
             System.out.println(BranchSaleList);
             for (Entry<String,Integer> entry : BranchSaleList) {
-            	System.out.println(entry.getKey() + "," + BranchMap.get(entry.getKey()) + "," + entry.getValue());
+            	System.out.println(entry.getKey() + "," + branchNameMap.get(entry.getKey()) + "," + entry.getValue());
             }
 
         }
@@ -235,4 +231,44 @@ public class Calculate {
 		    }
         */
 	}
+
+   public static void SerialNumberCheck(ArrayList <String>rcdList){
+	   //rcdListIntへキャストしてコピー
+	    ArrayList <Integer>rcdListInt = new ArrayList<Integer>();
+		for(String r : rcdList) {
+		    rcdListInt.add(Integer.parseInt(r.substring(0,8)));
+		}
+		//rcdListの連番チェック
+		for(int i = 0 ; i < rcdListInt.size(); i++){
+			if (rcdListInt.get(i) != i + 1 ) {
+				System.out.println("ファイル名が連番になっていません");
+				System.exit(0);
+			}
+		}
+   }
+   /*
+   public static void RcdProcessing(BufferedReader br){
+   //ファイルの読み込み、ここでファイルの中身が四桁以上あるときのエラーをやる
+    			//try-catchがネストしているのも問題
+    			String a;
+    			int count = 0; //count + 1は何行目の処理なのかを示す
+    			while((a = br.readLine()) != null){
+    				try{
+    				    saleTemp[count] = a;
+    				    count += 1;
+    				}
+    				//4行を超える場合
+    				catch(ArrayIndexOutOfBoundsException e) {
+    					System.out.println(e);
+    					System.out.println( count + 1 + "のフォーマットが不正です");
+    				}
+    				//3行ない場合
+    				for(String tem  : saleTemp){
+    					if(tem == null) {
+    						System.out.println( count + 1 + "のフォーマットが不正です");
+    				    }
+    			    }
+    			}
+   }
+   */
 }
