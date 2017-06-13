@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.regex.Matcher;
@@ -33,7 +34,6 @@ public class Calculate {
 		String directory = "C:\\java";
 		/*
 		try{
-
 			String name = reader.readLine();
 			directory = name;
 		}
@@ -44,7 +44,7 @@ public class Calculate {
 
 		HashMap<String ,String> branchNameMap = new HashMap<String ,String>(); //支店コード、支店名
 		HashMap<String,String> productNameMap = new HashMap<String ,String>();
-		HashMap<String, Long> branchSaleMap = new HashMap<String, Long>(); //支店コード、売り上げ
+		LinkedHashMap<String, Long> branchSaleMap = new LinkedHashMap<String, Long>(); //支店コード、売り上げ
 		HashMap<String, Long> productSaleMap = new HashMap<String,Long>();
 
 		//支店定義ファイルの格納
@@ -105,7 +105,6 @@ public class Calculate {
 
 		//売り上げファイルの読み込み
 		ArrayList <String>rcdList = new ArrayList<String>();
-		ArrayList<Map.Entry<String,Long>> BranchSaleList = new ArrayList<Map.Entry<String,Long>>(branchSaleMap.entrySet());
 
 		File targetDir = null;
 		targetDir = new File(directory);
@@ -159,10 +158,7 @@ public class Calculate {
 				saleTemp.clear();
 				br.close();
 			}
-			//支店の出力（確認用）
-			for(String key : branchSaleMap.keySet()) {
-				System.out.println(key + "," + branchNameMap.get(key) +"," +branchSaleMap.get(key) );
-			}
+
 		}
 		catch(IOException e) {
 			System.out.println(e);
@@ -172,19 +168,11 @@ public class Calculate {
 			System.out.println(e);
 		}
 
-		//ソート
-		Collections.sort(BranchSaleList, new Comparator<Map.Entry<String,Long>>(){
-			@Override
-			public int compare(
-				Entry<String,Long> entry1, Entry<String,Long> entry2 ) {
-				return ((Long)entry2.getValue()).compareTo((Long)entry1.getValue());
-			}
-		});
+		branchSaleMap = sortSaleList(branchSaleMap);
 
-		//支店コード、支店名、合計額の出力（確認用）
-		System.out.println(BranchSaleList);
-		for (Entry<String,Long> entry : BranchSaleList) {
-			System.out.println(entry.getKey() + "," + branchNameMap.get(entry.getKey()) + "," + entry.getValue());
+		//支店の出力（確認用）
+		for(String key : branchSaleMap.keySet()) {
+			System.out.println(key + "," + branchNameMap.get(key) +"," +branchSaleMap.get(key) );
 		}
 
 
@@ -200,7 +188,7 @@ public class Calculate {
 			  BufferedWriter bw = new BufferedWriter(fw);
 			  PrintWriter pw = new PrintWriter(bw);
 			  //書き込み
-			  for (Entry<String,Long> entry : BranchSaleList) {
+			  for (Entry<String ,Long> entry : branchSaleMap.entrySet()) {
 					pw.println(entry.getKey() + "," + branchNameMap.get(entry.getKey()) + "," + entry.getValue());
 			  }
 			  //PrintWriterオブジェクトをクローズ
@@ -226,6 +214,26 @@ public class Calculate {
 			}
 		}
    }
+   /* ソートされたリンクドハッシュマップを返すメソッド
+    * @param HashMap
+    * @return HashMap
+    */
+   public static LinkedHashMap<String,Long> sortSaleList(LinkedHashMap<String, Long> branchSaleMap){
+	   ArrayList<Map.Entry<String,Long>> BranchSaleList = new ArrayList<Map.Entry<String,Long>>(branchSaleMap.entrySet());
+	   Collections.sort(BranchSaleList, new Comparator<Map.Entry<String,Long>>(){
+			@Override
+			public int compare(
+				Entry<String,Long> entry1, Entry<String,Long> entry2 ) {
+				return ((Long)entry2.getValue()).compareTo((Long)entry1.getValue());
+			}
+	   });
+
+	   LinkedHashMap<String,Long> resultMap = new LinkedHashMap<String,Long>();
+	   for (Entry<String,Long> entry : BranchSaleList) {
+			resultMap.put(entry.getKey(), entry.getValue());
+	   }
+	   return resultMap;
+   }
    /*
    集計を配列にした場合；
    //rcdファイルをひとつずつ処理する
@@ -236,7 +244,6 @@ public class Calculate {
 		File file = new File(directory ,rcdList.get(i));
 		FileReader fr = new FileReader(file);
 		BufferedReader br = new BufferedReader(fr);
-
 		//ファイルの読み込み、ここでファイルの中身が四桁以上あるときのエラーをやる
 		//try-catchがネストしているのも問題
 		String a;
