@@ -18,9 +18,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 //ファイルディレクトリ:C:\\java
-//商品定義ファイルディレクトリ:
-
-
 
 public class Calculate {
 
@@ -33,7 +30,7 @@ public class Calculate {
     	InputStreamReader in = new InputStreamReader(System.in);
     	BufferedReader reader = new BufferedReader(in);
         */
-    	String directory = args[0];
+    	String directory = "C:\\java";
     	/*
     	try{
 
@@ -63,13 +60,8 @@ public class Calculate {
         	    	temp = a.split(",",-1);
         	        //支店定義フォーマットの判別式
         	    	if(temp.length == 2 && temp[0].matches("[0-9]{3}")) {
-        	            try{
         	                branchNameMap.put(temp[0],temp[1]);
         	                branchSaleMap.put(temp[0],0);
-        	            }
-        	            catch(java.lang.NumberFormatException e) {
-        	            	System.out.println("支店定義ファイルのフォーマットが不正です");
-        	            }
         	    	}
         	    	else {
         	    		System.out.println("支店定義ファイルのフォーマットが不正です");
@@ -83,22 +75,20 @@ public class Calculate {
     		System.out.println(e);
     		System.out.println("支店定義ファイルが存在しません");
     	}
-    	finally{
-
-    	}
 
     	//商品定義ファイルの格納
     	try{
 		    File file = new File(directory ,"commodity.lst");
 		    FileReader fr = new FileReader(file);
 		    BufferedReader br = new BufferedReader(fr);
+
             String a;
             String[] temp;
 
             while((a = br.readLine()) != null) {
-        	    	temp = a.split(",");
+        	    	temp = a.split(",",-1);
         	        //商品定義フォーマットの判別式
-        	    	if(temp[0].matches("[A-Z]{3}[0-9]{5}")) {
+        	    	if(temp.length == 2 && temp[0].matches("^[A-Z]{3}[0-9]{5}$")) {
         	            productNameMap.put(temp[0],temp[1]);
         	    	}
         	    	else {
@@ -135,51 +125,40 @@ public class Calculate {
 		    }
 		}
 
-			SerialNumberCheck(rcdList);
+		SerialNumberCheck(rcdList);
 
 	    try{
 			//rcdファイルをひとつずつ処理する
             int i ; // i + 1番目のrcdファイルを処理中
-			String[]  saleTemp;
-			saleTemp = new String[3]; //[0]=支店コード[1]=商品コード[2]=金額
+			ArrayList<String> saleTemp;
+			saleTemp = new ArrayList<String>(); //[0]=支店コード[1]=商品コード[2]=金額
             for(i = 0; i < rcdList.size(); i++) {
             	File file = new File(directory ,rcdList.get(i));
     	    	FileReader fr = new FileReader(file);
     			BufferedReader br = new BufferedReader(fr);
 
     			//ファイルの読み込み、ここでファイルの中身が四桁以上あるときのエラーをやる
-    			//try-catchがネストしているのも問題
     			String a;
-    			int count = 0; //count + 1は何行目の処理なのかを示す
     			while((a = br.readLine()) != null){
-    				try{
-    				    saleTemp[count] = a;
-    				    count += 1;
-    				}
-    				//4行を超える場合
-    				catch(ArrayIndexOutOfBoundsException e) {
-    					System.out.println(e);
-    					System.out.println( i + 1 + "のフォーマットが不正です");
-    				}
+    				saleTemp.add(a);
     			}
-    			//3行ない場合
-    			for(String tem  : saleTemp){
-					if(tem == null) {
-						System.out.println(i + 1 + "のフォーマットが不正です");
-				    }
-    			}
+    			//要素が三個でない場合-メソッド化してエラーチェックにする
+				if(saleTemp.size() != 3) {
+					System.out.println(i + 1 + "のフォーマットが不正です");
+					break;
+				}
+
     			//支店合計
-    			if(branchNameMap.containsKey(saleTemp[0])){
-    			    branchSaleMap.put(saleTemp[0] , branchSaleMap.get(saleTemp[0]) + Integer.parseInt(saleTemp[2]));
+    			if(branchNameMap.containsKey(saleTemp.get(0))){
+    			    branchSaleMap.put(saleTemp.get(0) , branchSaleMap.get(saleTemp.get(0)) + Integer.parseInt(saleTemp.get(2)));
     			}
     			//10桁を超えたらループを抜けて読み込み中断
-                if (branchSaleMap.get(saleTemp[0]) > 1000000000) {
+                if (branchSaleMap.get(saleTemp.get(0)) > 1000000000) {
                 	System.out.println("合計金額が十桁を超えました");
+                	break;
                 }
                 //saleTempを空にする
-                saleTemp[0] = null;
-                saleTemp[1] = null;
-                saleTemp[2] = null;
+                saleTemp.clear();
                 br.close();
             }
             //支店の出力（確認用）
@@ -193,9 +172,6 @@ public class Calculate {
 		}
 		catch(NumberFormatException e){
 			System.out.println(e);
-		}
-		finally{
-
 		}
 
 		//ソート
@@ -253,44 +229,50 @@ public class Calculate {
 		}
    }
    /*
-   //ファイルの読み込み、ここでファイルの中身が四桁以上あるときのエラーをやる
-	//try-catchがネストしているのも問題
-	String a;
-	int count = 0; //count + 1は何行目の処理なのかを示す
-	while((a = br.readLine()) != null){
+   配列の場合；
+   //rcdファイルをひとつずつ処理する
+    int i ; // i + 1番目のrcdファイルを処理中
+	String[]  saleTemp;
+	saleTemp = new String[3]; //[0]=支店コード[1]=商品コード[2]=金額
+    for(i = 0; i < rcdList.size(); i++) {
+    	File file = new File(directory ,rcdList.get(i));
+    	FileReader fr = new FileReader(file);
+		BufferedReader br = new BufferedReader(fr);
 
-		try{
-		    saleTemp[count] = a;
-		    count += 1;
+		//ファイルの読み込み、ここでファイルの中身が四桁以上あるときのエラーをやる
+		//try-catchがネストしているのも問題
+		String a;
+		int count = 0; //count + 1は何行目の処理なのかを示す
+		while((a = br.readLine()) != null){
+			try{
+			    saleTemp[count] = a;
+			    count += 1;
+			}
+			//4行を超える場合
+			catch(ArrayIndexOutOfBoundsException e) {
+				System.out.println(e);
+				System.out.println( i + 1 + "のフォーマットが不正です");
+			}
 		}
-		//4行を超える場合
-		catch(ArrayIndexOutOfBoundsException e) {
-			System.out.println(e);
-			System.out.println( i + 1 + "のフォーマットが不正です");
+		//3行ない場合
+		for(String tem  : saleTemp){
+			if(tem == null) {
+				System.out.println(i + 1 + "のフォーマットが不正です");
+		    }
 		}
-	}
-	//3行ない場合
-
-	for(String tem  : saleTemp){
-		if(tem == null) {
-			System.out.println(i + 1 + "のフォーマットが不正です");
-	    }
-	}
-
-
-
-
-	//支店合計
-	branchSaleMap.put(saleTemp[0] , branchSaleMap.get(saleTemp[0]) + Integer.parseInt(saleTemp[2]));
-	//10桁を超えたらループを抜けて読み込み中断
-    if (branchSaleMap.get(saleTemp[0]) > 1000000000) {
-    	System.out.println("合計金額が十桁を超えました");
-    	break;
-    }
-    //saleTempを空にする
-    saleTemp[0] = null;
-    saleTemp[1] = null;
-    saleTemp[2] = null;
-
+		//支店合計
+		if(branchNameMap.containsKey(saleTemp[0])){
+		    branchSaleMap.put(saleTemp[0] , branchSaleMap.get(saleTemp[0]) + Integer.parseInt(saleTemp[2]));
+		}
+		//10桁を超えたらループを抜けて読み込み中断
+        if (branchSaleMap.get(saleTemp[0]) > 1000000000) {
+        	System.out.println("合計金額が十桁を超えました");
+        	break;
+        }
+        //saleTempを空にする
+        saleTemp[0] = null;
+        saleTemp[1] = null;
+        saleTemp[2] = null;
+        br.close();
    */
 }
