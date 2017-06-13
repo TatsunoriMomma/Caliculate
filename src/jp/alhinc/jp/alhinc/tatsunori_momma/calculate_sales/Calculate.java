@@ -25,27 +25,13 @@ public class Calculate {
 
 
 	public static void main(String[] args) {
-		/*
-		//ディレクトリを標準入力で受け取る
-		System.out.println("ディレクトリを入力してください。");
-		InputStreamReader in = new InputStreamReader(System.in);
-		BufferedReader reader = new BufferedReader(in);
-		*/
-		String directory = "C:\\java";
-		/*
-		try{
-			String name = reader.readLine();
-			directory = name;
-		}
-		catch(IOException e){
-			System.out.println(e);
-		}
-		*/
+
+		String directory = args[0];
 
 		HashMap<String ,String> branchNameMap = new HashMap<String ,String>(); //支店コード、支店名
 		HashMap<String,String> productNameMap = new HashMap<String ,String>();
 		LinkedHashMap<String, Long> branchSaleMap = new LinkedHashMap<String, Long>(); //支店コード、売り上げ
-		HashMap<String, Long> productSaleMap = new HashMap<String,Long>();
+		LinkedHashMap<String, Long> productSaleMap = new LinkedHashMap<String,Long>();
 
 		//支店定義ファイルの格納
 		try{
@@ -67,7 +53,6 @@ public class Calculate {
 					break;
 				}
 			}
-			System.out.println(branchNameMap);
 			br.close();
 		}
 		catch(IOException e) {
@@ -94,7 +79,6 @@ public class Calculate {
 					System.out.println("商品定義ファイルのフォーマットが不正です");
 				}
 			}
-			System.out.println(productNameMap);
 			br.close();
 		}
 		catch(IOException e) {
@@ -113,7 +97,6 @@ public class Calculate {
 		System.out.println(Arrays.toString(fileList));
 
 		//正規表現で抽出する
-		//.rcdの拡張子マッチング、ファイル名は数字のみ8桁
 		String regex = "^[0-9]{8}\\.rcd$";
 		for(int i = 0; i < fileList.length; i++) {
 			Pattern p = Pattern.compile(regex);
@@ -123,7 +106,7 @@ public class Calculate {
 			}
 		}
 
-		SerialNumberCheck(rcdList);
+		serialNumberCheck(rcdList);
 
 		try{
 			//rcdファイルをひとつずつ処理する
@@ -168,40 +151,14 @@ public class Calculate {
 			System.out.println(e);
 		}
 
-		branchSaleMap = sortSaleList(branchSaleMap);
-
-		//支店の出力（確認用）
-		for(String key : branchSaleMap.keySet()) {
-			System.out.println(key + "," + branchNameMap.get(key) +"," +branchSaleMap.get(key) );
-		}
-
+		branchSaleMap = sortSaleLinkedMap(branchSaleMap);
 
 		//branch.outの作成
-		File file = new File(directory,"branch.out");
-			try{
-			  if (file.createNewFile()){
-				System.out.println("ファイルの作成に成功しました");
-			  }else{
-				System.out.println("ファイルの作成に失敗しました");
-			  }
-			  FileWriter fw = new FileWriter(file, true);
-			  BufferedWriter bw = new BufferedWriter(fw);
-			  PrintWriter pw = new PrintWriter(bw);
-			  //書き込み
-			  for (Entry<String ,Long> entry : branchSaleMap.entrySet()) {
-					pw.println(entry.getKey() + "," + branchNameMap.get(entry.getKey()) + "," + entry.getValue());
-			  }
-			  //PrintWriterオブジェクトをクローズ
-			  pw.close();
-			}
-			catch(IOException e){
-			  System.out.println(e);
-			}
+		branchOut(directory,branchNameMap,branchSaleMap);
 
 	}
 
-   public static void SerialNumberCheck(ArrayList <String>rcdList){
-	   //rcdListIntへキャストしてコピー
+   public static void serialNumberCheck(ArrayList <String>rcdList){
 		ArrayList <Integer>rcdListInt = new ArrayList<Integer>();
 		for(String r : rcdList) {
 			rcdListInt.add(Integer.parseInt(r.substring(0,8)));
@@ -210,17 +167,18 @@ public class Calculate {
 		for(int i = 0 ; i < rcdListInt.size(); i++){
 			if (rcdListInt.get(i) != i + 1 ) {
 				System.out.println("ファイル名が連番になっていません");
-				System.exit(0);
+				System.exit(1);
 			}
 		}
    }
+
    /* ソートされたリンクドハッシュマップを返すメソッド
     * @param HashMap
     * @return HashMap
     */
-   public static LinkedHashMap<String,Long> sortSaleList(LinkedHashMap<String, Long> branchSaleMap){
-	   ArrayList<Map.Entry<String,Long>> BranchSaleList = new ArrayList<Map.Entry<String,Long>>(branchSaleMap.entrySet());
-	   Collections.sort(BranchSaleList, new Comparator<Map.Entry<String,Long>>(){
+   public static LinkedHashMap<String,Long> sortSaleLinkedMap(LinkedHashMap<String, Long> SaleMap){
+	   ArrayList<Map.Entry<String,Long>> SaleList = new ArrayList<Map.Entry<String,Long>>(SaleMap.entrySet());
+	   Collections.sort(SaleList, new Comparator<Map.Entry<String,Long>>(){
 			@Override
 			public int compare(
 				Entry<String,Long> entry1, Entry<String,Long> entry2 ) {
@@ -229,10 +187,35 @@ public class Calculate {
 	   });
 
 	   LinkedHashMap<String,Long> resultMap = new LinkedHashMap<String,Long>();
-	   for (Entry<String,Long> entry : BranchSaleList) {
+	   for (Entry<String,Long> entry : SaleList) {
 			resultMap.put(entry.getKey(), entry.getValue());
 	   }
 	   return resultMap;
+   }
+   
+   /*
+    *
+    */
+   public static void branchOut(String directory,HashMap<String,String> branchNameMap, LinkedHashMap<String,Long>branchSaleMap){
+	   File file = new File(directory,"branch.out");
+		try{
+		  if (file.createNewFile()){
+			System.out.println("ファイルの作成に成功しました");
+		  }else{
+			System.out.println("ファイルの作成に失敗しました");
+		  }
+		  FileWriter fw = new FileWriter(file, true);
+		  BufferedWriter bw = new BufferedWriter(fw);
+		  PrintWriter pw = new PrintWriter(bw);
+		  //書き込み
+		  for (Entry<String ,Long> entry : branchSaleMap.entrySet()) {
+				pw.println(entry.getKey() + "," + branchNameMap.get(entry.getKey()) + "," + entry.getValue());
+		  }
+		  pw.close();
+		}
+		catch(IOException e){
+		  System.out.println(e);
+		}
    }
    /*
    集計を配列にした場合；
