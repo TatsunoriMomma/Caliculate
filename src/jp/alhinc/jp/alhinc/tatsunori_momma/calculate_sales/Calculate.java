@@ -33,7 +33,7 @@ public class Calculate {
     	InputStreamReader in = new InputStreamReader(System.in);
     	BufferedReader reader = new BufferedReader(in);
         */
-    	String directory = "C:\\java";
+    	String directory = args[0];
     	/*
     	try{
 
@@ -48,7 +48,7 @@ public class Calculate {
     	HashMap<String ,String> branchNameMap = new HashMap<String ,String>(); //支店コード、支店名
     	HashMap<String,String> productNameMap = new HashMap<String ,String>();
     	HashMap<String, Integer> branchSaleMap = new HashMap<String, Integer>(); //支店コード、売り上げ
-		HashMap<String, Integer> productSaleMap = new HashMap<String,Integer>();
+    	HashMap<String, Integer> productSaleMap = new HashMap<String,Integer>();
 
     	//支店定義ファイルの格納
     	try{
