@@ -154,7 +154,9 @@ public class Calculate {
 		branchSaleMap = sortSaleLinkedMap(branchSaleMap);
 
 		//branch.outの作成
-		branchOut(directory,branchNameMap,branchSaleMap);
+
+		createFile("branch", directory , branchNameMap, branchSaleMap);
+		createFile("commodity", directory , productNameMap, productSaleMap);
 
 	}
 
@@ -192,12 +194,12 @@ public class Calculate {
 	   }
 	   return resultMap;
    }
-   
+
    /*
     *
     */
-   public static void branchOut(String directory,HashMap<String,String> branchNameMap, LinkedHashMap<String,Long>branchSaleMap){
-	   File file = new File(directory,"branch.out");
+   public static void createFile(String name,String directory,HashMap<String,String> NameMap, LinkedHashMap<String,Long>SaleMap){
+	   File file = new File(directory, name +".out");
 		try{
 		  if (file.createNewFile()){
 			System.out.println("ファイルの作成に成功しました");
@@ -208,8 +210,8 @@ public class Calculate {
 		  BufferedWriter bw = new BufferedWriter(fw);
 		  PrintWriter pw = new PrintWriter(bw);
 		  //書き込み
-		  for (Entry<String ,Long> entry : branchSaleMap.entrySet()) {
-				pw.println(entry.getKey() + "," + branchNameMap.get(entry.getKey()) + "," + entry.getValue());
+		  for (Entry<String ,Long> entry : SaleMap.entrySet()) {
+				pw.println(entry.getKey() + "," + NameMap.get(entry.getKey()) + "," + entry.getValue());
 		  }
 		  pw.close();
 		}
