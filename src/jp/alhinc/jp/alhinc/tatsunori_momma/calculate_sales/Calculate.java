@@ -227,6 +227,10 @@ public class Calculate {
 				}
 				pw.close();
 			}
+			else{
+				System.out.println("予期せぬエラーが発生しました");
+				System.exit(1);
+			}
 		}
 		catch(IOException e){
 			  System.out.println(e);
