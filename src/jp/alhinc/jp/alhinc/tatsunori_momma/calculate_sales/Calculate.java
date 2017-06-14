@@ -166,8 +166,8 @@ public class Calculate {
 
 		//結果ファイルの作成
 
-		createFile("branch", directory , branchNameMap, branchSaleMap);
-		createFile("commodity", directory , productNameMap, productSaleMap);
+		outputFile("branch", directory , branchNameMap, branchSaleMap);
+		outputFile("commodity", directory , productNameMap, productSaleMap);
 
 	}
 
@@ -209,25 +209,33 @@ public class Calculate {
    /*
     *
     */
-   public static void createFile(String name,String directory,HashMap<String,String> NameMap, LinkedHashMap<String,Long>SaleMap){
+   public static void outputFile(String name,String directory,HashMap<String,String> NameMap, LinkedHashMap<String,Long>SaleMap){
 	   File file = new File(directory, name +".out");
+
 		try{
-		  if (file.createNewFile()){
-			System.out.println("ファイルの作成に成功しました");
-		  }else{
-			System.out.println("ファイルの作成に失敗しました");
-		  }
-		  FileWriter fw = new FileWriter(file, true);
-		  BufferedWriter bw = new BufferedWriter(fw);
-		  PrintWriter pw = new PrintWriter(bw);
-		  //書き込み
-		  for (Entry<String ,Long> entry : SaleMap.entrySet()) {
-				pw.println(entry.getKey() + "," + NameMap.get(entry.getKey()) + "," + entry.getValue());
-		  }
-		  pw.close();
+			if (!(file.exists())){
+				file.createNewFile();
+				System.out.println("ファイルの作成に成功しました");
+			}
+			if(checkRockFile(file)){
+				FileWriter fw = new FileWriter(file, true);
+				BufferedWriter bw = new BufferedWriter(fw);
+				PrintWriter pw = new PrintWriter(bw);
+				//書き込み
+				for (Entry<String ,Long> entry : SaleMap.entrySet()) {
+					pw.println(entry.getKey() + "," + NameMap.get(entry.getKey()) + "," + entry.getValue());
+				}
+				pw.close();
+			}
 		}
 		catch(IOException e){
-		  System.out.println(e);
+			  System.out.println(e);
 		}
+   }
+   public static boolean checkRockFile(File file){
+	   if(file.isFile() && file.canWrite()){
+		   return true;
+	   }
+	   return false;
    }
 }
