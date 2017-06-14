@@ -38,53 +38,66 @@ public class Calculate {
 			File file = new File(directory , "branch.lst");
 			FileReader fr = new FileReader(file);
 			BufferedReader br = new BufferedReader(fr);
+			try {
+				String a;
+				String[] temp;
 
-			String a;
-			String[] temp;
-
-			while((a = br.readLine()) != null) {
-				temp = a.split(",",-1);
-				//支店定義フォーマットの判別式
-				if(temp.length == 2 && temp[0].matches("[0-9]{3}")) {
-					branchNameMap.put(temp[0],temp[1]);
-					branchSaleMap.put(temp[0],0l);
-				} else {
-					System.out.println("支店定義ファイルのフォーマットが不正です");
-					System.exit(1);
+				while((a = br.readLine()) != null) {
+					temp = a.split(",",-1);
+					//支店定義フォーマットの判別式
+					if(temp.length == 2 && temp[0].matches("[0-9]{3}")) {
+						branchNameMap.put(temp[0],temp[1]);
+						branchSaleMap.put(temp[0],0l);
+					} else {
+						throw new IllegalArgumentException();
+					}
 				}
 			}
-			br.close();
+			finally{
+				br.close();
+			}
 		}
 		catch(IOException e) {
 			System.out.println("支店定義ファイルが存在しません");
 			System.exit(1);
 		}
+		catch(IllegalArgumentException e) {
+			System.out.println("支店定義ファイルのフォーマットが不正です");
+			System.exit(1);
+		}
+
 
 		//商品定義ファイルの格納
 		try{
 			File file = new File(directory ,"commodity.lst");
 			FileReader fr = new FileReader(file);
 			BufferedReader br = new BufferedReader(fr);
+			try{
+				String a;
+				String[] temp;
 
-			String a;
-			String[] temp;
-
-			while((a = br.readLine()) != null) {
-				temp = a.split(",",-1);
-				//商品定義フォーマットの判別式
-				if(temp.length == 2 && temp[0].matches("^[A-Z]{3}[0-9]{5}$")) {
-					productNameMap.put(temp[0],temp[1]);
-					productSaleMap.put(temp[0], 0l);
-				}
-				else {
-					System.out.println("商品定義ファイルのフォーマットが不正です");
-					System.exit(1);
+				while((a = br.readLine()) != null) {
+					temp = a.split(",",-1);
+					//商品定義フォーマットの判別式
+					if(temp.length == 2 && temp[0].matches("^[A-Z]{3}[0-9]{5}$")) {
+						productNameMap.put(temp[0],temp[1]);
+						productSaleMap.put(temp[0], 0l);
+					}
+					else {
+						throw new IllegalArgumentException();
+					}
 				}
 			}
-			br.close();
+			finally{
+				br.close();
+			}
 		}
 		catch(IOException e) {
 			System.out.println("商品定義ファイルが存在しません");
+			System.exit(1);
+		}
+		catch(IllegalArgumentException e){
+			System.out.println("商品定義ファイルのフォーマットが不正です");
 			System.exit(1);
 		}
 
@@ -117,43 +130,46 @@ public class Calculate {
 				File file = new File(directory ,rcdList.get(i));
 				FileReader fr = new FileReader(file);
 				BufferedReader br = new BufferedReader(fr);
+				try{
+					String a;
+					while((a = br.readLine()) != null){
+						saleTemp.add(a);
+					}
+					//要素が三個でない場合
+					if(saleTemp.size() != 3) {
+						System.out.println(rcdList.get(i)+ "のフォーマットが不正です");
+						return;
+					}
+					//支店に該当があるかチェック
+					if(!(branchNameMap.containsKey(saleTemp.get(0)))){
+						System.out.println(rcdList.get(i) + "の支店コードが不正です");
+						return;
+					}
+					//商品に該当があるかチェック
+					if(!(productNameMap.containsKey(saleTemp.get(1)))){
+						System.out.println(rcdList.get(i) + "の商品コードが不正です");
+						return;
+					}
+					//支店商品合計
+					branchSaleMap.put(saleTemp.get(0) , branchSaleMap.get(saleTemp.get(0)) + Long.parseLong(saleTemp.get(2)));
+					productSaleMap.put(saleTemp.get(1) , productSaleMap.get(saleTemp.get(1)) + Long.parseLong(saleTemp.get(2)));
 
-				String a;
-				while((a = br.readLine()) != null){
-					saleTemp.add(a);
+					//10桁を超えたらループを抜けて読み込み中断
+					if (branchSaleMap.get(saleTemp.get(0)) > 1000000000) {
+						System.out.println("合計金額が十桁を超えました");
+						return;
+					}
+					//10桁を超えたらループを抜けて読み込み中断
+					if (productSaleMap.get(saleTemp.get(1)) > 1000000000) {
+						System.out.println("合計金額が十桁を超えました");
+						return;
+					}
+					//saleTempを空にする
+					saleTemp.clear();
 				}
-				//要素が三個でない場合
-				if(saleTemp.size() != 3) {
-					System.out.println(rcdList.get(i)+ "のフォーマットが不正です");
-					System.exit(1);
+				finally{
+					br.close();
 				}
-				//支店に該当があるかチェック
-				if(!(branchNameMap.containsKey(saleTemp.get(0)))){
-					System.out.println(rcdList.get(i) + "の支店コードが不正です");
-					System.exit(1);
-				}
-				//商品に該当があるかチェック
-				if(!(productNameMap.containsKey(saleTemp.get(1)))){
-					System.out.println(rcdList.get(i) + "の商品コードが不正です");
-					System.exit(1);
-				}
-				//支店商品合計
-				branchSaleMap.put(saleTemp.get(0) , branchSaleMap.get(saleTemp.get(0)) + Long.parseLong(saleTemp.get(2)));
-				productSaleMap.put(saleTemp.get(1) , productSaleMap.get(saleTemp.get(1)) + Long.parseLong(saleTemp.get(2)));
-
-				//10桁を超えたらループを抜けて読み込み中断
-				if (branchSaleMap.get(saleTemp.get(0)) > 1000000000) {
-					System.out.println("合計金額が十桁を超えました");
-					System.exit(1);
-				}
-				//10桁を超えたらループを抜けて読み込み中断
-				if (productSaleMap.get(saleTemp.get(1)) > 1000000000) {
-					System.out.println("合計金額が十桁を超えました");
-					System.exit(1);
-				}
-				//saleTempを空にする
-				saleTemp.clear();
-				br.close();
 			}
 		}
 		catch(IOException e) {
@@ -170,6 +186,8 @@ public class Calculate {
 		outputFile("commodity", directory , productNameMap, productSaleMap);
 
 	}
+
+
 
    public static void serialNumberCheck(ArrayList <String>rcdList){
 		ArrayList <Integer>rcdListInt = new ArrayList<Integer>();
@@ -221,11 +239,15 @@ public class Calculate {
 				FileWriter fw = new FileWriter(file, true);
 				BufferedWriter bw = new BufferedWriter(fw);
 				PrintWriter pw = new PrintWriter(bw);
-				//書き込み
-				for (Entry<String ,Long> entry : SaleMap.entrySet()) {
-					pw.println(entry.getKey() + "," + NameMap.get(entry.getKey()) + "," + entry.getValue());
+				try{
+					//書き込み
+					for (Entry<String ,Long> entry : SaleMap.entrySet()) {
+						pw.println(entry.getKey() + "," + NameMap.get(entry.getKey()) + "," + entry.getValue());
+					}
 				}
-				pw.close();
+				finally{
+					pw.close();
+				}
 			}
 			else{
 				System.out.println("予期せぬエラーが発生しました");
