@@ -23,6 +23,10 @@ public class Calculate {
 	public static void main(String[] args) {
 
 		String directory = args[0];
+		if(args.length != 1){
+			System.out.println("予期せぬエラーが発生しました");
+			System.exit(1);
+		}
 
 		HashMap<String ,String> branchNameMap = new HashMap<String ,String>(); //支店コード、支店名
 		HashMap<String,String> productNameMap = new HashMap<String ,String>();
@@ -118,7 +122,7 @@ public class Calculate {
 				while((a = br.readLine()) != null){
 					saleTemp.add(a);
 				}
-				//要素が三個でない場合-メソッド化してエラーチェックにする
+				//要素が三個でない場合
 				if(saleTemp.size() != 3) {
 					System.out.println(rcdList.get(i)+ "のフォーマットが不正です");
 					System.exit(1);
