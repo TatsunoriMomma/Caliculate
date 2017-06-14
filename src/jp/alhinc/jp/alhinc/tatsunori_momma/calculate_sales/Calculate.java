@@ -14,19 +14,18 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 //ファイルディレクトリ:C:\\java
 
 public class Calculate {
 	public static void main(String[] args) {
 
-		String directory = args[0];
+
 		if(args.length != 1){
 			System.out.println("予期せぬエラーが発生しました");
 			System.exit(1);
 		}
+		String directory = args[0];
 
 		HashMap<String ,String> branchNameMap = new HashMap<String ,String>(); //支店コード、支店名
 		HashMap<String,String> productNameMap = new HashMap<String ,String>();
@@ -104,18 +103,21 @@ public class Calculate {
 
 		//売り上げファイルの読み込み
 		ArrayList <String>rcdList = new ArrayList<String>();
+		ArrayList <String>fileList = new ArrayList<String>();
 
 		File targetDir = null;
 		targetDir = new File(directory);
-		String[] fileList = targetDir.list();
+		File[] targetFiles = targetDir.listFiles();
+		for(int i = 0; i < targetFiles.length;i++){
+			if(targetFiles[i].isFile()){
+				fileList.add(targetFiles[i].getName());
+			}
+		}
 
 		//正規表現で抽出する
-		String regex = "^[0-9]{8}\\.rcd$";
-		for(int i = 0; i < fileList.length; i++) {
-			Pattern p = Pattern.compile(regex);
-			Matcher m = p.matcher(fileList[i]);
-			if (m.find()) {
-				rcdList.add(fileList[i]);
+		for(int i = 0; i < fileList.size(); i++) {
+			if (fileList.get(i).matches("^[0-9]{8}\\.rcd$")) {
+				rcdList.add(fileList.get(i));
 			}
 		}
 
@@ -138,17 +140,17 @@ public class Calculate {
 					//要素が三個でない場合
 					if(saleTemp.size() != 3) {
 						System.out.println(rcdList.get(i)+ "のフォーマットが不正です");
-						return;
+						throw new Exception();
 					}
 					//支店に該当があるかチェック
 					if(!(branchNameMap.containsKey(saleTemp.get(0)))){
 						System.out.println(rcdList.get(i) + "の支店コードが不正です");
-						return;
+						throw new Exception();
 					}
 					//商品に該当があるかチェック
 					if(!(productNameMap.containsKey(saleTemp.get(1)))){
 						System.out.println(rcdList.get(i) + "の商品コードが不正です");
-						return;
+						throw new Exception();
 					}
 					//支店商品合計
 					branchSaleMap.put(saleTemp.get(0) , branchSaleMap.get(saleTemp.get(0)) + Long.parseLong(saleTemp.get(2)));
@@ -157,12 +159,12 @@ public class Calculate {
 					//10桁を超えたらループを抜けて読み込み中断
 					if (branchSaleMap.get(saleTemp.get(0)) > 1000000000) {
 						System.out.println("合計金額が十桁を超えました");
-						return;
+						throw new Exception();
 					}
 					//10桁を超えたらループを抜けて読み込み中断
 					if (productSaleMap.get(saleTemp.get(1)) > 1000000000) {
 						System.out.println("合計金額が十桁を超えました");
-						return;
+						throw new Exception();
 					}
 					//saleTempを空にする
 					saleTemp.clear();
@@ -176,6 +178,9 @@ public class Calculate {
 			System.out.println("売り上げファイルが存在しません");
 			System.exit(1);
 		}
+		catch(Exception e) {
+			System.exit(1);
+		}
 
 		branchSaleMap = sortSaleLinkedMap(branchSaleMap);
 		productSaleMap = sortSaleLinkedMap(productSaleMap);
@@ -184,7 +189,6 @@ public class Calculate {
 
 		outputFile("branch", directory , branchNameMap, branchSaleMap);
 		outputFile("commodity", directory , productNameMap, productSaleMap);
-
 	}
 
 
@@ -236,7 +240,7 @@ public class Calculate {
 				System.out.println("ファイルの作成に成功しました");
 			}
 			if(checkRockFile(file)){
-				FileWriter fw = new FileWriter(file, true);
+				FileWriter fw = new FileWriter(file, false);
 				BufferedWriter bw = new BufferedWriter(fw);
 				PrintWriter pw = new PrintWriter(bw);
 				try{
@@ -255,7 +259,8 @@ public class Calculate {
 			}
 		}
 		catch(IOException e){
-			  System.out.println(e);
+			System.out.println("予期せぬエラーが発生しました");
+			System.exit(1);
 		}
    }
    public static boolean checkRockFile(File file){
