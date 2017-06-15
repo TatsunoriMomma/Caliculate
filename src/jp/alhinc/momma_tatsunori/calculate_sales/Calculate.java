@@ -1,4 +1,4 @@
-package jp.alhinc.jp.alhinc.tatsunori_momma.calculate_sales;
+package jp.alhinc.momma_tatsunori.calculate_sales;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -64,7 +64,7 @@ public class Calculate {
 		}
 
 		if(!(serialNumberCheck(rcdList))){
-			System.out.println("ファイル名が連番になっていません");
+			System.out.println("売上ファイル名が連番になっていません");
 			return;
 		}
 
@@ -103,12 +103,12 @@ public class Calculate {
 
 					//10桁を超えたらループを抜けて読み込み中断
 					if (branchSaleMap.get(saleTemp.get(0)) > 999999999l) {
-						System.out.println("合計金額が十桁を超えました");
+						System.out.println("合計金額が10桁を超えました");
 						return;
 					}
 					//10桁を超えたらループを抜けて読み込み中断
 					if (commoditySaleMap.get(saleTemp.get(1)) > 999999999l) {
-						System.out.println("合計金額が十桁を超えました");
+						System.out.println("合計金額が10桁を超えました");
 						return;
 					}
 					//saleTempを空にする
@@ -120,7 +120,6 @@ public class Calculate {
 			}
 		}
 		catch(IOException e) {
-			System.out.println("売り上げファイルが存在しません");
 			return;
 		}
 
