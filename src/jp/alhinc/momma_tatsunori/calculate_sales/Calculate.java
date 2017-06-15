@@ -166,7 +166,7 @@ public class Calculate {
 		} catch(IOException e) {
 			System.out.println(name + "定義ファイルが存在しません");
 			return false;
-		} finally{
+		} finally {
 			try{
 				br.close();
 			}
@@ -219,26 +219,24 @@ public class Calculate {
 	public static boolean outputFile(String type,String directory,HashMap<String,String> nameMap, LinkedHashMap<String,Long>saleMap){
 		File file = new File(directory, type +".out");
 
+
+		PrintWriter pw = null;
 		try{
 			if (!(file.exists())){
 				file.createNewFile();
 			}
 			FileWriter fw = new FileWriter(file, false);
 			BufferedWriter bw = new BufferedWriter(fw);
-			PrintWriter pw = new PrintWriter(bw);
-			try{
-				//書き込み
-				for (Entry<String ,Long> entry : saleMap.entrySet()) {
-					pw.println(entry.getKey() + "," + nameMap.get(entry.getKey()) + "," + entry.getValue());
-				}
-			}
-			finally{
-				pw.close();
-			}
-		}
+			pw = new PrintWriter(bw);
 
-		catch(IOException e){
+			//書き込み
+			for (Entry<String ,Long> entry : saleMap.entrySet()) {
+				pw.println(entry.getKey() + "," + nameMap.get(entry.getKey()) + "," + entry.getValue());
+			}
+		} catch (IOException e){
 			return false;
+		} finally {
+			pw.close();
 		}
 		return true;
 	}
