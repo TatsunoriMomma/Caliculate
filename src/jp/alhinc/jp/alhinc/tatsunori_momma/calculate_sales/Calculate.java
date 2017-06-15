@@ -129,7 +129,6 @@ public class Calculate {
 		commoditySaleMap = sortSaleLinkedMap(commoditySaleMap);
 
 		//結果ファイルの作成
-
 		if(!(outputFile("branch", directory , branchNameMap, branchSaleMap))){
 			System.out.println("予期せぬエラーが発生しました");
 			return;
@@ -225,28 +224,21 @@ public class Calculate {
 			if (!(file.exists())){
 				file.createNewFile();
 			}
-			if(checkFile(file)){
-				FileWriter fw = new FileWriter(file, false);
-				BufferedWriter bw = new BufferedWriter(fw);
-				PrintWriter pw = new PrintWriter(bw);
-				try{
-					//書き込み
-					for (Entry<String ,Long> entry : saleMap.entrySet()) {
-						pw.println(entry.getKey() + "," + nameMap.get(entry.getKey()) + "," + entry.getValue());
-					}
-				}
-				finally{
-					pw.close();
+			FileWriter fw = new FileWriter(file, false);
+			BufferedWriter bw = new BufferedWriter(fw);
+			PrintWriter pw = new PrintWriter(bw);
+			try{
+				//書き込み
+				for (Entry<String ,Long> entry : saleMap.entrySet()) {
+					pw.println(entry.getKey() + "," + nameMap.get(entry.getKey()) + "," + entry.getValue());
 				}
 			}
+			finally{
+				pw.close();
+			}
 		}
+
 		catch(IOException e){
-			return false;
-		}
-		return true;
-	}
-	public static boolean checkFile(File file){
-		if(file.isFile() && file.canWrite()){
 			return false;
 		}
 		return true;
