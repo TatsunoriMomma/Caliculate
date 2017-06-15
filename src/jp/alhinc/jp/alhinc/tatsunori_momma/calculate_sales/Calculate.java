@@ -15,8 +15,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-//ファイルディレクトリ:C:\\java
-
 public class Calculate {
 	public static void main(String[] args) {
 
@@ -35,6 +33,7 @@ public class Calculate {
 
 		String filePath1 = directory + File.separator + "branch.lst";
 		String filePath2 = directory + File.separator + "commodity.lst";
+
 		//支店定義ファイルの格納
 		if(!(inputFile(filePath1,"支店","[0-9]{3}", branchNameMap, branchSaleMap))){
 			return;
@@ -65,6 +64,7 @@ public class Calculate {
 		}
 
 		if(!(serialNumberCheck(rcdList))){
+			System.out.println("ファイル名が連番になっていません");
 			return;
 		}
 
@@ -131,15 +131,17 @@ public class Calculate {
 		//結果ファイルの作成
 
 		if(!(outputFile("branch", directory , branchNameMap, branchSaleMap))){
+			System.out.println("予期せぬエラーが発生しました");
 			return;
 		}
 		if(!(outputFile("commodity", directory , commodityNameMap, commoditySaleMap))){
+			System.out.println("予期せぬエラーが発生しました");
 			return;
 		}
 
 	}
 
-	public static boolean inputFile(String filepass, String name,String regularExpression, HashMap<String,String>NameMap, LinkedHashMap<String,Long>SaleMap){
+	public static boolean inputFile(String filepass, String name, String regularExpression, HashMap<String,String>nameMap, LinkedHashMap<String,Long>saleMap){
 		File file = new File(filepass);
 		if(!(file.exists())){
 			System.out.println(name + "定義ファイルが存在しません");
@@ -151,17 +153,17 @@ public class Calculate {
 			br = new BufferedReader(fr);
 			String a;
 			String[] temp;
-				while((a = br.readLine()) != null) {
-					temp = a.split(",",-1);
-					//コードのフォーマットの判別式
-					if(temp.length == 2 && temp[0].matches(regularExpression)) {
-						NameMap.put(temp[0],temp[1]);
-						SaleMap.put(temp[0],0l);
-					} else {
-						System.out.println(name + "定義ファイルのフォーマットが不正です");
-						return false;
-					}
+			while((a = br.readLine()) != null) {
+				temp = a.split(",",-1);
+				//コードのフォーマットの判別式
+				if(temp.length == 2 && temp[0].matches(regularExpression)) {
+					nameMap.put(temp[0],temp[1]);
+					saleMap.put(temp[0],0l);
+				} else {
+					System.out.println(name + "定義ファイルのフォーマットが不正です");
+					return false;
 				}
+			}
 
 		} catch(IOException e) {
 			System.out.println(name + "定義ファイルが存在しません");
@@ -174,7 +176,6 @@ public class Calculate {
 				System.out.println(name + "定義ファイルのフォーマットが不正です");
 				return false;
 			}
-
 		}
 		return true;
 	}
@@ -187,7 +188,6 @@ public class Calculate {
 		//rcdListの連番チェック
 		for(int i = 0 ; i < rcdListInt.size(); i++){
 			if (rcdListInt.get(i) != i + 1 ) {
-				System.out.println("ファイル名が連番になっていません");
 				return false;
 			}
 		}
@@ -198,8 +198,8 @@ public class Calculate {
 	 * @param HashMap
 	 * @return HashMap
 	 */
-	public static LinkedHashMap<String,Long> sortSaleLinkedMap(LinkedHashMap<String, Long> SaleMap){
-		ArrayList<Map.Entry<String,Long>> SaleList = new ArrayList<Map.Entry<String,Long>>(SaleMap.entrySet());
+	public static LinkedHashMap<String,Long> sortSaleLinkedMap(LinkedHashMap<String, Long> saleMap){
+		ArrayList<Map.Entry<String,Long>> SaleList = new ArrayList<Map.Entry<String,Long>>(saleMap.entrySet());
 		Collections.sort(SaleList, new Comparator<Map.Entry<String,Long>>(){
 			@Override
 			public int compare(
@@ -218,7 +218,7 @@ public class Calculate {
 	/*
 	 *
 	 */
-	public static boolean outputFile(String type,String directory,HashMap<String,String> NameMap, LinkedHashMap<String,Long>SaleMap){
+	public static boolean outputFile(String type,String directory,HashMap<String,String> nameMap, LinkedHashMap<String,Long>saleMap){
 		File file = new File(directory, type +".out");
 
 		try{
@@ -231,8 +231,8 @@ public class Calculate {
 				PrintWriter pw = new PrintWriter(bw);
 				try{
 					//書き込み
-					for (Entry<String ,Long> entry : SaleMap.entrySet()) {
-						pw.println(entry.getKey() + "," + NameMap.get(entry.getKey()) + "," + entry.getValue());
+					for (Entry<String ,Long> entry : saleMap.entrySet()) {
+						pw.println(entry.getKey() + "," + nameMap.get(entry.getKey()) + "," + entry.getValue());
 					}
 				}
 				finally{
@@ -241,7 +241,6 @@ public class Calculate {
 			}
 		}
 		catch(IOException e){
-			System.out.println("予期せぬエラーが発生しました");
 			return false;
 		}
 		return true;
