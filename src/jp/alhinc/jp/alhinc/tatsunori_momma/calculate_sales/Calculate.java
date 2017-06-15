@@ -157,12 +157,12 @@ public class Calculate {
 					productSaleMap.put(saleTemp.get(1) , productSaleMap.get(saleTemp.get(1)) + Long.parseLong(saleTemp.get(2)));
 
 					//10桁を超えたらループを抜けて読み込み中断
-					if (branchSaleMap.get(saleTemp.get(0)) > 999999999) {
+					if (branchSaleMap.get(saleTemp.get(0)) > 999999999l) {
 						System.out.println("合計金額が十桁を超えました");
 						throw new Exception();
 					}
 					//10桁を超えたらループを抜けて読み込み中断
-					if (productSaleMap.get(saleTemp.get(1)) > 999999999) {
+					if (productSaleMap.get(saleTemp.get(1)) > 999999999l) {
 						System.out.println("合計金額が十桁を超えました");
 						throw new Exception();
 					}
