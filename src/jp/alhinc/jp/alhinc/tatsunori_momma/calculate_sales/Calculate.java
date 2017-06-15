@@ -20,27 +20,33 @@ import java.util.Map.Entry;
 public class Calculate {
 	public static void main(String[] args) {
 
-
+		//コマンドライン引数チェック
 		if(args.length != 1){
 			System.out.println("予期せぬエラーが発生しました");
-			System.exit(1);
+			return;
 		}
 		String directory = args[0];
+
 
 		HashMap<String ,String> branchNameMap = new HashMap<String ,String>(); //支店コード、支店名
 		HashMap<String,String> commodityNameMap = new HashMap<String ,String>();
 		LinkedHashMap<String, Long> branchSaleMap = new LinkedHashMap<String, Long>(); //支店コード、売り上げ
 		LinkedHashMap<String, Long> commoditySaleMap = new LinkedHashMap<String,Long>();
 
+		String filePath1 = directory + File.separator + "branch.lst";
+		String filePath2 = directory + File.separator + "commodity.lst";
 		//支店定義ファイルの格納
-		inputFile("branch",directory, branchNameMap, branchSaleMap);
-
+		if(!(inputFile(filePath1,"支店","[0-9]{3}", branchNameMap, branchSaleMap))){
+			return;
+		}
 
 		//商品定義ファイルの格納
-		inputFile("commodity",directory,commodityNameMap, commoditySaleMap);
+		if(!(inputFile(filePath2,"商品","^[A-Z]{3}[0-9]{5}$", commodityNameMap, commoditySaleMap))){
+			return;
+		}
 
 
-		//売り上げファイルの読み込み
+		//売り上げファイルの読み込み、ファイル抽出
 		ArrayList <String>rcdList = new ArrayList<String>();
 		ArrayList <String>fileList = new ArrayList<String>();
 
@@ -52,15 +58,15 @@ public class Calculate {
 				fileList.add(targetFiles[i].getName());
 			}
 		}
-
-		//正規表現で抽出する
 		for(int i = 0; i < fileList.size(); i++) {
 			if (fileList.get(i).matches("^[0-9]{8}\\.rcd$")) {
 				rcdList.add(fileList.get(i));
 			}
 		}
 
-		serialNumberCheck(rcdList);
+		if(!(serialNumberCheck(rcdList))){
+			return;
+		}
 
 		//支店商品集計
 		try{
@@ -79,17 +85,17 @@ public class Calculate {
 					//要素が三個でない場合
 					if(saleTemp.size() != 3) {
 						System.out.println(rcdList.get(i)+ "のフォーマットが不正です");
-						throw new Exception();
+						return;
 					}
 					//支店に該当があるかチェック
 					if(!(branchNameMap.containsKey(saleTemp.get(0)))){
 						System.out.println(rcdList.get(i) + "の支店コードが不正です");
-						throw new Exception();
+						return;
 					}
 					//商品に該当があるかチェック
 					if(!(commodityNameMap.containsKey(saleTemp.get(1)))){
 						System.out.println(rcdList.get(i) + "の商品コードが不正です");
-						throw new Exception();
+						return;
 					}
 					//支店商品合計
 					branchSaleMap.put(saleTemp.get(0) , branchSaleMap.get(saleTemp.get(0)) + Long.parseLong(saleTemp.get(2)));
@@ -98,12 +104,12 @@ public class Calculate {
 					//10桁を超えたらループを抜けて読み込み中断
 					if (branchSaleMap.get(saleTemp.get(0)) > 999999999l) {
 						System.out.println("合計金額が十桁を超えました");
-						throw new Exception();
+						return;
 					}
 					//10桁を超えたらループを抜けて読み込み中断
 					if (commoditySaleMap.get(saleTemp.get(1)) > 999999999l) {
 						System.out.println("合計金額が十桁を超えました");
-						throw new Exception();
+						return;
 					}
 					//saleTempを空にする
 					saleTemp.clear();
@@ -115,75 +121,65 @@ public class Calculate {
 		}
 		catch(IOException e) {
 			System.out.println("売り上げファイルが存在しません");
-			System.exit(1);
-		}
-		catch(Exception e) {
-			System.exit(1);
+			return;
 		}
 
+		//ソート
 		branchSaleMap = sortSaleLinkedMap(branchSaleMap);
 		commoditySaleMap = sortSaleLinkedMap(commoditySaleMap);
 
 		//結果ファイルの作成
 
-		outputFile("branch", directory , branchNameMap, branchSaleMap);
-		outputFile("commodity", directory , commodityNameMap, commoditySaleMap);
+		if(!(outputFile("branch", directory , branchNameMap, branchSaleMap))){
+			return;
+		}
+		if(!(outputFile("commodity", directory , commodityNameMap, commoditySaleMap))){
+			return;
+		}
+
 	}
 
-	public static void inputFile(String type, String directory, HashMap<String,String>NameMap, LinkedHashMap<String,Long>SaleMap){
-		HashMap<String,String> fileType = new HashMap<String,String>();
-		fileType.put("branch", "支店");
-		fileType.put("commodity", "商品");
-
+	public static boolean inputFile(String filepass, String name,String regularExpression, HashMap<String,String>NameMap, LinkedHashMap<String,Long>SaleMap){
+		File file = new File(filepass);
+		if(!(file.exists())){
+			System.out.println(name + "定義ファイルが存在しません");
+			return false;
+		}
+		BufferedReader br = null;
 		try{
-			File file = new File(directory , type + ".lst");
 			FileReader fr = new FileReader(file);
-			BufferedReader br = new BufferedReader(fr);
-			try {
-				String a;
-				String[] temp;
-				if(type == "branch"){
-					while((a = br.readLine()) != null) {
-						temp = a.split(",",-1);
-						//支店定義フォーマットの判別式
-						if(temp.length == 2 && temp[0].matches("[0-9]{3}")) {
-							NameMap.put(temp[0],temp[1]);
-							SaleMap.put(temp[0],0l);
-						} else {
-							throw new IllegalArgumentException();
-						}
+			br = new BufferedReader(fr);
+			String a;
+			String[] temp;
+				while((a = br.readLine()) != null) {
+					temp = a.split(",",-1);
+					//コードのフォーマットの判別式
+					if(temp.length == 2 && temp[0].matches(regularExpression)) {
+						NameMap.put(temp[0],temp[1]);
+						SaleMap.put(temp[0],0l);
+					} else {
+						System.out.println(name + "定義ファイルのフォーマットが不正です");
+						return false;
 					}
 				}
-				if(type == "commodity"){
-					while((a = br.readLine()) != null) {
-						temp = a.split(",",-1);
-						//商品定義フォーマットの判別式
-						if(temp.length == 2 && temp[0].matches("^[A-Z]{3}[0-9]{5}$")) {
-							NameMap.put(temp[0],temp[1]);
-							SaleMap.put(temp[0], 0l);
-						}
-						else {
-							throw new IllegalArgumentException();
-						}
-					}
-				}
-			}
-			finally{
+
+		} catch(IOException e) {
+			System.out.println(name + "定義ファイルが存在しません");
+			return false;
+		} finally{
+			try{
 				br.close();
 			}
-		}
+			catch(IOException e) {
+				System.out.println(name + "定義ファイルのフォーマットが不正です");
+				return false;
+			}
 
-		catch(IOException e) {
-			System.out.println(fileType.get(type) + "定義ファイルが存在しません");
-			System.exit(1);
 		}
-		catch(IllegalArgumentException e) {
-			System.out.println(fileType.get(type) + "定義ファイルのフォーマットが不正です");
-			System.exit(1);
-		}
+		return true;
 	}
 
-	public static void serialNumberCheck(ArrayList <String>rcdList){
+	public static boolean serialNumberCheck(ArrayList <String>rcdList){
 		ArrayList <Integer>rcdListInt = new ArrayList<Integer>();
 		for(String r : rcdList) {
 			rcdListInt.add(Integer.parseInt(r.substring(0,8)));
@@ -192,9 +188,10 @@ public class Calculate {
 		for(int i = 0 ; i < rcdListInt.size(); i++){
 			if (rcdListInt.get(i) != i + 1 ) {
 				System.out.println("ファイル名が連番になっていません");
-				System.exit(1);
+				return false;
 			}
 		}
+		return true;
 	}
 
 	/* ソートされたリンクドハッシュマップを返すメソッド
@@ -221,15 +218,14 @@ public class Calculate {
 	/*
 	 *
 	 */
-	public static void outputFile(String type,String directory,HashMap<String,String> NameMap, LinkedHashMap<String,Long>SaleMap){
+	public static boolean outputFile(String type,String directory,HashMap<String,String> NameMap, LinkedHashMap<String,Long>SaleMap){
 		File file = new File(directory, type +".out");
 
 		try{
 			if (!(file.exists())){
 				file.createNewFile();
-				System.out.println("ファイルの作成に成功しました");
 			}
-			if(checkRockFile(file)){
+			if(checkFile(file)){
 				FileWriter fw = new FileWriter(file, false);
 				BufferedWriter bw = new BufferedWriter(fw);
 				PrintWriter pw = new PrintWriter(bw);
@@ -243,20 +239,17 @@ public class Calculate {
 					pw.close();
 				}
 			}
-			else{
-				System.out.println("予期せぬエラーが発生しました");
-				System.exit(1);
-			}
 		}
 		catch(IOException e){
 			System.out.println("予期せぬエラーが発生しました");
-			System.exit(1);
+			return false;
 		}
+		return true;
 	}
-	public static boolean checkRockFile(File file){
+	public static boolean checkFile(File file){
 		if(file.isFile() && file.canWrite()){
-			return true;
+			return false;
 		}
-		return false;
+		return true;
 	}
 }
