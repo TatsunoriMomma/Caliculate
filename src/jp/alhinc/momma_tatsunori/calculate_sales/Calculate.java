@@ -64,7 +64,6 @@ public class Calculate {
 		}
 
 		if(!(serialNumberCheck(rcdList))){
-			System.out.println("売上ファイル名が連番になっていません");
 			return;
 		}
 
@@ -120,6 +119,7 @@ public class Calculate {
 			}
 		}
 		catch(IOException e) {
+			System.out.println("予期せぬエラーが発生しました");
 			return;
 		}
 
@@ -129,11 +129,9 @@ public class Calculate {
 
 		//結果ファイルの作成
 		if(!(outputFile("branch.out", directory , branchNameMap, branchSaleMap))){
-			System.out.println("予期せぬエラーが発生しました");
 			return;
 		}
 		if(!(outputFile("commodity.out", directory , commodityNameMap, commoditySaleMap))){
-			System.out.println("予期せぬエラーが発生しました");
 			return;
 		}
 
@@ -190,6 +188,7 @@ public class Calculate {
 		//rcdListの連番チェック
 		for(int i = 0 ; i < rcdListInt.size(); i++){
 			if (rcdListInt.get(i) != i + 1 ) {
+				System.out.println("売上ファイル名が連番になっていません");
 				return false;
 			}
 		}
@@ -239,11 +238,13 @@ public class Calculate {
 				pw.println(entry.getKey() + "," + nameMap.get(entry.getKey()) + "," + entry.getValue());
 			}
 		} catch (IOException e){
+			System.out.println("予期せぬエラーが発生しました");
 			return false;
 		} finally {
 			if(pw != null){
 				pw.close();
 			} else{
+				System.out.println("予期せぬエラーが発生しました");
 				return false;
 			}
 
