@@ -236,7 +236,12 @@ public class Calculate {
 		} catch (IOException e){
 			return false;
 		} finally {
-			pw.close();
+			if(!(pw == null)){
+				pw.close();
+			} else{
+				return false;
+			}
+
 		}
 		return true;
 	}
