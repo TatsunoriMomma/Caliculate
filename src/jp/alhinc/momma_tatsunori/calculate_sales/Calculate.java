@@ -250,6 +250,8 @@ public class Calculate {
 		} finally {
 			if(pw != null){
 				pw.close();
+			} else {
+				return false;
 			}
 		}
 		return true;
