@@ -244,14 +244,13 @@ public class Calculate {
 		} catch (IOException e){
 			System.out.println("予期せぬエラーが発生しました");
 			return false;
+		} catch(NullPointerException e) {
+			System.out.println("予期せぬエラーが発生しました");
+			return false;
 		} finally {
 			if(pw != null){
 				pw.close();
-			} else{
-				System.out.println("予期せぬエラーが発生しました");
-				return false;
 			}
-
 		}
 		return true;
 	}
