@@ -26,28 +26,28 @@ public class Calculate {
 		String directory = args[0];
 
 
-		HashMap<String ,String> branchNameMap = new HashMap<String ,String>(); //支店コード、支店名
-		HashMap<String,String> commodityNameMap = new HashMap<String ,String>();
+		HashMap<String, String> branchNameMap = new HashMap<String, String>(); //支店コード、支店名
+		HashMap<String, String> commodityNameMap = new HashMap<String, String>();
 		LinkedHashMap<String, Long> branchSaleMap = new LinkedHashMap<String, Long>(); //支店コード、売り上げ
-		LinkedHashMap<String, Long> commoditySaleMap = new LinkedHashMap<String,Long>();
+		LinkedHashMap<String, Long> commoditySaleMap = new LinkedHashMap<String, Long>();
 
 		String filePath1 = directory + File.separator + "branch.lst";
 		String filePath2 = directory + File.separator + "commodity.lst";
 
 		//支店定義ファイルの格納
-		if(!(inputFile(filePath1,"支店","[0-9]{3}", branchNameMap, branchSaleMap))){
+		if(!(inputFile(filePath1, "支店", "[0-9]{3}", branchNameMap, branchSaleMap))){
 			return;
 		}
 
 		//商品定義ファイルの格納
-		if(!(inputFile(filePath2,"商品","([0-9]|[A-Z]){8}", commodityNameMap, commoditySaleMap))){
+		if(!(inputFile(filePath2, "商品", "([0-9]|[A-Z]){8}", commodityNameMap, commoditySaleMap))){
 			return;
 		}
 
 
 		//売り上げファイルの読み込み、ファイル抽出
-		ArrayList <String>fileList = new ArrayList<String>();
-		ArrayList <String>rcdList = new ArrayList<String>();
+		ArrayList<String>fileList = new ArrayList<String>();
+		ArrayList<String>rcdList = new ArrayList<String>();
 
 		File targetDir = null;
 		targetDir = new File(directory);
@@ -73,7 +73,7 @@ public class Calculate {
 			ArrayList<String> saleTemp;
 			saleTemp = new ArrayList<String>(); //[0]=支店コード[1]=商品コード[2]=金額
 			for(i = 0; i < rcdList.size(); i++) {
-				File file = new File(directory ,rcdList.get(i));
+				File file = new File(directory, rcdList.get(i));
 				FileReader fr = new FileReader(file);
 				BufferedReader br = new BufferedReader(fr);
 				try{
@@ -97,8 +97,8 @@ public class Calculate {
 						return;
 					}
 					//支店商品合計
-					branchSaleMap.put(saleTemp.get(0) , branchSaleMap.get(saleTemp.get(0)) + Long.parseLong(saleTemp.get(2)));
-					commoditySaleMap.put(saleTemp.get(1) , commoditySaleMap.get(saleTemp.get(1)) + Long.parseLong(saleTemp.get(2)));
+					branchSaleMap.put(saleTemp.get(0), branchSaleMap.get(saleTemp.get(0)) + Long.parseLong(saleTemp.get(2)));
+					commoditySaleMap.put(saleTemp.get(1), commoditySaleMap.get(saleTemp.get(1)) + Long.parseLong(saleTemp.get(2)));
 
 					//10桁を超えたらループを抜けて読み込み中断
 					if (branchSaleMap.get(saleTemp.get(0)) > 999999999l) {
@@ -132,16 +132,16 @@ public class Calculate {
 		commoditySaleMap = sortSaleLinkedMap(commoditySaleMap);
 
 		//結果ファイルの作成
-		if(!(outputFile("branch.out", directory , branchNameMap, branchSaleMap))){
+		if(!(outputFile("branch.out", directory, branchNameMap, branchSaleMap))){
 			return;
 		}
-		if(!(outputFile("commodity.out", directory , commodityNameMap, commoditySaleMap))){
+		if(!(outputFile("commodity.out", directory, commodityNameMap, commoditySaleMap))){
 			return;
 		}
 
 	}
 
-	public static boolean inputFile(String filepass, String name, String regularExpression, HashMap<String,String>nameMap, LinkedHashMap<String,Long>saleMap){
+	public static boolean inputFile(String filepass, String name, String regularExpression, HashMap<String, String>nameMap, LinkedHashMap<String, Long>saleMap){
 		File file = new File(filepass);
 		if(!(file.exists())){
 			System.out.println(name + "定義ファイルが存在しません");
@@ -184,8 +184,8 @@ public class Calculate {
 		return true;
 	}
 
-	public static boolean serialNumberCheck(ArrayList <String>rcdList){
-		ArrayList <Integer>rcdListInt = new ArrayList<Integer>();
+	public static boolean serialNumberCheck(ArrayList<String>rcdList){
+		ArrayList<Integer>rcdListInt = new ArrayList<Integer>();
 		for(String r : rcdList) {
 			rcdListInt.add(Integer.parseInt(r.substring(0,8)));
 		}
@@ -204,12 +204,12 @@ public class Calculate {
 	 * @param saleMap コード、売り上げのmap
 	 * @return resultMap
 	 */
-	public static LinkedHashMap<String,Long> sortSaleLinkedMap(LinkedHashMap<String, Long> saleMap){
-		ArrayList<Map.Entry<String,Long>> SaleList = new ArrayList<Map.Entry<String,Long>>(saleMap.entrySet());
-		Collections.sort(SaleList, new Comparator<Map.Entry<String,Long>>(){
+	public static LinkedHashMap<String, Long>sortSaleLinkedMap(LinkedHashMap<String, Long>saleMap){
+		ArrayList<Map.Entry<String, Long>> SaleList = new ArrayList<Map.Entry<String, Long>>(saleMap.entrySet());
+		Collections.sort(SaleList, new Comparator<Map.Entry<String, Long>>(){
 			@Override
 			public int compare(
-					Entry<String,Long> entry1, Entry<String,Long> entry2 ) {
+					Entry<String, Long> entry1, Entry<String, Long> entry2 ) {
 				return ((Long)entry2.getValue()).compareTo((Long)entry1.getValue());
 			}
 		});
@@ -224,7 +224,7 @@ public class Calculate {
 	/*
 	 *
 	 */
-	public static boolean outputFile(String fileName,String directory,HashMap<String,String> nameMap, LinkedHashMap<String,Long>saleMap){
+	public static boolean outputFile(String fileName, String directory, HashMap<String, String>nameMap, LinkedHashMap<String, Long>saleMap){
 		File file = new File(directory, fileName);
 
 
