@@ -122,6 +122,10 @@ public class Calculate {
 			System.out.println("予期せぬエラーが発生しました");
 			return;
 		}
+		catch(NumberFormatException e){
+			System.out.println("予期せぬエラーが発生しました");
+			return;
+		}
 
 		//ソート
 		branchSaleMap = sortSaleLinkedMap(branchSaleMap);
