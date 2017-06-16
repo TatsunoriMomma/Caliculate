@@ -40,7 +40,7 @@ public class Calculate {
 		}
 
 		//商品定義ファイルの格納
-		if(!(inputFile(filePath2,"商品","^[A-Z]{3}[0-9]{5}$", commodityNameMap, commoditySaleMap))){
+		if(!(inputFile(filePath2,"商品","([0-9]|[A-Z]){8}", commodityNameMap, commoditySaleMap))){
 			return;
 		}
 
