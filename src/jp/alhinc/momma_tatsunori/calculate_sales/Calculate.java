@@ -70,7 +70,7 @@ public class Calculate {
 		//支店商品集計
 		try{
 			int i ; // i + 1番目のrcdファイルを処理中
-			ArrayList<String> saleTemp;
+			ArrayList<String>saleTemp;
 			saleTemp = new ArrayList<String>(); //[0]=支店コード[1]=商品コード[2]=金額
 			for(i = 0; i < rcdList.size(); i++) {
 				File file = new File(directory, rcdList.get(i));
@@ -214,7 +214,7 @@ public class Calculate {
 			}
 		});
 
-		LinkedHashMap<String,Long> resultMap = new LinkedHashMap<String,Long>();
+		LinkedHashMap<String, Long> resultMap = new LinkedHashMap<String, Long>();
 		for (Entry<String,Long> entry : SaleList) {
 			resultMap.put(entry.getKey(), entry.getValue());
 		}
@@ -238,7 +238,7 @@ public class Calculate {
 			pw = new PrintWriter(bw, false);
 
 			//書き込み
-			for (Entry<String ,Long> entry : saleMap.entrySet()) {
+			for (Entry<String, Long> entry : saleMap.entrySet()) {
 				pw.println(entry.getKey() + "," + nameMap.get(entry.getKey()) + "," + entry.getValue());
 			}
 		} catch (IOException e){
