@@ -101,12 +101,12 @@ public class Calculate {
 					commoditySaleMap.put(saleTemp.get(1), commoditySaleMap.get(saleTemp.get(1)) + Long.parseLong(saleTemp.get(2)));
 
 					//10桁を超えたらループを抜けて読み込み中断
-					if (branchSaleMap.get(saleTemp.get(0)) > 999999999l) {
+					if (branchSaleMap.get(saleTemp.get(0)) > 9999999999L) {
 						System.out.println("合計金額が10桁を超えました");
 						return;
 					}
 					//10桁を超えたらループを抜けて読み込み中断
-					if (commoditySaleMap.get(saleTemp.get(1)) > 999999999l) {
+					if (commoditySaleMap.get(saleTemp.get(1)) > 9999999999L) {
 						System.out.println("合計金額が10桁を超えました");
 						return;
 					}
@@ -140,11 +140,13 @@ public class Calculate {
 		}
 
 	}
-
-	public static boolean inputFile(String filepass, String name, String regularExpression, HashMap<String, String>nameMap, LinkedHashMap<String, Long>saleMap){
-		File file = new File(filepass);
+	/*ファイルを入力する
+	 *
+	 */
+	public static boolean inputFile(String filePass, String definitionName, String regularExpression, HashMap<String, String>nameMap, LinkedHashMap<String, Long>saleMap){
+		File file = new File(filePass);
 		if(!(file.exists())){
-			System.out.println(name + "定義ファイルが存在しません");
+			System.out.println(definitionName + "定義ファイルが存在しません");
 			return false;
 		}
 		BufferedReader br = null;
@@ -160,13 +162,13 @@ public class Calculate {
 					nameMap.put(temp[0],temp[1]);
 					saleMap.put(temp[0],0l);
 				} else {
-					System.out.println(name + "定義ファイルのフォーマットが不正です");
+					System.out.println(definitionName + "定義ファイルのフォーマットが不正です");
 					return false;
 				}
 			}
 
 		} catch(IOException e) {
-			System.out.println(name + "定義ファイルが存在しません");
+			System.out.println(definitionName + "定義ファイルが存在しません");
 			return false;
 		} finally {
 			try{
@@ -177,7 +179,7 @@ public class Calculate {
 				}
 			}
 			catch(IOException e) {
-				System.out.println(name + "定義ファイルのフォーマットが不正です");
+				System.out.println(definitionName + "定義ファイルのフォーマットが不正です");
 				return false;
 			}
 		}
@@ -226,8 +228,6 @@ public class Calculate {
 	 */
 	public static boolean outputFile(String fileName, String directory, HashMap<String, String>nameMap, LinkedHashMap<String, Long>saleMap){
 		File file = new File(directory, fileName);
-
-
 		PrintWriter pw = null;
 		try{
 			if (!(file.exists())){
