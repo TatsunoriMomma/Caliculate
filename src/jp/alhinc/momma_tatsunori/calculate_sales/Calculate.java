@@ -46,8 +46,8 @@ public class Calculate {
 
 
 		//売り上げファイルの読み込み、ファイル抽出
-		ArrayList <String>rcdList = new ArrayList<String>();
 		ArrayList <String>fileList = new ArrayList<String>();
+		ArrayList <String>rcdList = new ArrayList<String>();
 
 		File targetDir = null;
 		targetDir = new File(directory);
@@ -168,7 +168,11 @@ public class Calculate {
 			return false;
 		} finally {
 			try{
-				br.close();
+				if(br != null){
+					br.close();
+				} else {
+					return false;
+				}
 			}
 			catch(IOException e) {
 				System.out.println(name + "定義ファイルのフォーマットが不正です");
@@ -193,8 +197,9 @@ public class Calculate {
 	}
 
 	/* ソートされたリンクドハッシュマップを返すメソッド
-	 * @param HashMap
-	 * @return HashMap
+	 *
+	 * @param saleMap コード、売り上げのmap
+	 * @return resultMap
 	 */
 	public static LinkedHashMap<String,Long> sortSaleLinkedMap(LinkedHashMap<String, Long> saleMap){
 		ArrayList<Map.Entry<String,Long>> SaleList = new ArrayList<Map.Entry<String,Long>>(saleMap.entrySet());
@@ -236,7 +241,7 @@ public class Calculate {
 		} catch (IOException e){
 			return false;
 		} finally {
-			if(!(pw == null)){
+			if(pw != null){
 				pw.close();
 			} else{
 				return false;
